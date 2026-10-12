@@ -1,0 +1,16 @@
+﻿Workout #;Date;Workout Name;Duration (sec);Exercise Name;Set Order;Weight (kg);Reps;RPE;Distance (meters);Seconds;Notes;Workout Notes
+1;2026-09-29 17:00:00;Leg day ;3600;Squat (Barbell);W;60;8;;;;;"Felt good,
+slept well"
+1;2026-09-29 17:00:00;Leg day ;3600;Squat (Barbell);1;100;5;8;;;;"Felt good,
+slept well"
+1;2026-09-29 17:00:00;Leg day ;3600;Squat (Barbell);Rest Timer;;;;;180;;"Felt good,
+slept well"
+1;2026-09-29 17:00:00;Leg day ;3600;Squat (Barbell);2;100;5;8.5;;;"last rep ""grindy""";"Felt good,
+slept well"
+1;2026-09-29 17:00:00;Leg day ;3600;Squat (Barbell);D;80;8;;;;;"Felt good,
+slept well"
+1;2026-09-29 17:00:00;Leg day ;3600;Rowing (Machine);Note;;;;;;Damper 5;"Felt good,
+slept well"
+1;2026-09-29 17:00:00;Leg day ;3600;Rowing (Machine);1;;;;2000;480;;"Felt good,
+slept well"
+2;2026-10-06 18:30:00;Push;2400;Bench Press (Barbell);1;80;8;;;;;
