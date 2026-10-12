@@ -20,6 +20,13 @@ import type { WeightUnit } from "./units.js";
 import { makeClock } from "./write/ids.js";
 import { WriteEngine } from "./write/write-engine.js";
 
+export interface BuiltServer {
+  server: McpServer;
+  /** A new MCP server over the same services, for transports that need one per request. */
+  createServer: () => McpServer;
+  sync: () => Promise<{ pages: number }>;
+}
+
 export function resolveWeightUnit(config: Config, snapshot: Snapshot, userId: string): WeightUnit {
   if (config.weightUnitOverride) return config.weightUnitOverride;
   const wu = (snapshot.preferences as any)?.weightUnit;
@@ -58,7 +65,7 @@ export async function buildServer(
   config: Config,
   fetchImpl: FetchLike,
   now: () => number = () => Date.now(),
-): Promise<{ server: McpServer; sync: () => Promise<{ pages: number }> }> {
+): Promise<BuiltServer> {
   const tokenStore = new TokenStore(config.dataDir);
   const { userId, seed } = await resolveIdentity(tokenStore, config);
 
@@ -109,12 +116,15 @@ export async function buildServer(
     },
   });
 
-  const server = new McpServer({ name: "strong-mcp", version: "0.1.0" });
-  registerReadTools(server, { service, sync });
-  registerWriteTools(server, writeService);
-  registerResources(server, service);
-  registerPrompts(server);
-  return { server, sync };
+  const createServer = () => {
+    const server = new McpServer({ name: "strong-mcp", version: "0.1.0" });
+    registerReadTools(server, { service, sync });
+    registerWriteTools(server, writeService);
+    registerResources(server, service);
+    registerPrompts(server);
+    return server;
+  };
+  return { server: createServer(), createServer, sync };
 }
 
 /**
@@ -123,9 +133,7 @@ export async function buildServer(
  * resources and prompts. Write tools are not registered. strong_sync re-reads
  * the file, so dropping in a newer export and syncing picks it up.
  */
-export async function buildCsvServer(
-  config: Config & { csvPath: string },
-): Promise<{ server: McpServer; sync: () => Promise<{ pages: number }> }> {
+export async function buildCsvServer(config: Config & { csvPath: string }): Promise<BuiltServer> {
   const load = async () => csvToSnapshot(parseStrongCsv(await readFile(config.csvPath, "utf8")));
   let snapshot = await load();
   const service = new ReadService({
@@ -137,9 +145,12 @@ export async function buildCsvServer(
     snapshot = await load();
     return { pages: 1 };
   };
-  const server = new McpServer({ name: "strong-mcp", version: "0.1.0" });
-  registerReadTools(server, { service, sync });
-  registerResources(server, service);
-  registerPrompts(server);
-  return { server, sync };
+  const createServer = () => {
+    const server = new McpServer({ name: "strong-mcp", version: "0.1.0" });
+    registerReadTools(server, { service, sync });
+    registerResources(server, service);
+    registerPrompts(server);
+    return server;
+  };
+  return { server: createServer(), createServer, sync };
 }

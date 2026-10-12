@@ -4,9 +4,11 @@ import { fetch } from "undici";
 import { makeTtyPrompts, runLogin } from "./auth/login-command.js";
 import type { FetchLikeWithHeaders } from "./auth/mfa.js";
 import { TokenStore } from "./auth/token-store.js";
+import { parseServeArgs } from "./cli-args.js";
 import { loadConfig } from "./config.js";
 import type { FetchLike } from "./http/client.js";
-import { buildCsvServer, buildServer } from "./server.js";
+import { startHttpServer } from "./http.js";
+import { type BuiltServer, buildCsvServer, buildServer } from "./server.js";
 
 async function runLoginCommand() {
   const config = loadConfig(process.env);
@@ -30,22 +32,27 @@ async function runLoginCommand() {
 }
 
 async function runServer() {
+  const args = parseServeArgs(process.argv.slice(2));
   const config = loadConfig(process.env);
+  let built: BuiltServer;
   if (config.csvPath) {
-    const { server } = await buildCsvServer({ ...config, csvPath: config.csvPath });
+    built = await buildCsvServer({ ...config, csvPath: config.csvPath });
     process.stderr.write(`strong-mcp: read-only CSV mode (${config.csvPath})\n`);
-    await server.connect(new StdioServerTransport());
+  } else {
+    built = await buildServer(config, fetch as unknown as FetchLike);
+    try {
+      const { pages } = await built.sync();
+      process.stderr.write(`strong-mcp: initial sync walked ${pages} page(s)\n`);
+    } catch (err) {
+      process.stderr.write(`strong-mcp: initial sync failed: ${(err as Error).message}\n`);
+    }
+  }
+  if (args.transport === "http") {
+    await startHttpServer({ ...args, token: config.httpToken, createServer: built.createServer });
+    process.stderr.write(`strong-mcp: listening on http://${args.host}:${args.port}/mcp\n`);
     return;
   }
-  const { server, sync } = await buildServer(config, fetch as unknown as FetchLike);
-  try {
-    const { pages } = await sync();
-    process.stderr.write(`strong-mcp: initial sync walked ${pages} page(s)\n`);
-  } catch (err) {
-    process.stderr.write(`strong-mcp: initial sync failed: ${(err as Error).message}\n`);
-  }
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
+  await built.server.connect(new StdioServerTransport());
 }
 
 async function main() {
