@@ -93,9 +93,13 @@ export class ReadService {
   }
 
   /** Extracts working sets (weight/reps/rpe) for one exercise group, skipping REST_TIMER-only cellSets. */
-  private setsOf(
-    group: any,
-  ): { reps: number | null; weight: number | null; unit: string; rpe: number | null }[] {
+  private setsOf(group: any): {
+    reps: number | null;
+    weight: number | null;
+    unit: string;
+    rpe: number | null;
+    otherCells?: { cellType: string; value: unknown }[];
+  }[] {
     const cellSets = Array.isArray(group?.cellSets) ? group.cellSets : [];
     const out: any[] = [];
     for (const cs of cellSets) {
@@ -106,15 +110,21 @@ export class ReadService {
       let reps: number | null = null;
       let weight: number | null = null;
       let rpe: number | null = null;
+      // Cell types we don't model yet (cardio distance/time, etc.) are passed
+      // through raw rather than silently dropped. Values are as stored by Strong.
+      const otherCells: { cellType: string; value: unknown }[] = [];
       for (const c of cells) {
         if (c.cellType === "REPS") reps = num(c.value);
         else if (c.cellType === "RPE") rpe = num(c.value);
         else if (WEIGHT_CELL_TYPES.has(c.cellType)) {
           const kg = num(c.value);
           weight = kg === null ? null : this.displayWeightKg(kg);
+        } else if (c.isHidden !== true && c.value !== null && c.value !== undefined) {
+          otherCells.push({ cellType: String(c.cellType), value: c.value });
         }
       }
-      out.push({ reps, weight, unit: this.weightUnitLabel, rpe });
+      const set = { reps, weight, unit: this.weightUnitLabel, rpe };
+      out.push(otherCells.length ? { ...set, otherCells } : set);
     }
     return out;
   }
