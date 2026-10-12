@@ -76,11 +76,12 @@ If your `token.json` lives somewhere non-default, add `"env": { "STRONG_DATA_DIR
 | --- | --- |
 | `strong_sync` | Sync the local snapshot from Strong (delta if possible, else full). |
 | `strong_whoami` | Current user id, unit preference, last sync time, and entity counts. |
-| `strong_list_workouts` | List recent workouts (newest first); optional `limit`. |
+| `strong_list_workouts` | List recent workouts (newest first); optional `limit` and `since`/`until`. |
 | `strong_get_workout` | One workout in full, with sets in display units. |
 | `strong_list_templates` | List saved workout templates. |
+| `strong_get_template` | One template with its exercises (ids included) and planned sets. |
 | `strong_list_exercises` | List exercise definitions; optional name `search`. |
-| `strong_get_exercise_history` | All logged sets for one exercise over time. |
+| `strong_get_exercise_history` | All logged sets for one exercise over time; optional `since`/`until`. |
 | `strong_list_measurements` | List body measurements; optional `type` filter (e.g. `WEIGHT`). |
 
 ### Write

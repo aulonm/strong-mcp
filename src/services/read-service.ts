@@ -145,11 +145,22 @@ export class ReadService {
       name: customName(w),
       startDate: w.startDate as string | undefined,
       endDate: w.endDate as string | undefined,
-      exercises: this.groups(w).map((g) => ({
-        name: this.exerciseName(measurementIdOf(g)),
-        sets: this.setsOf(g),
-      })),
+      exercises: this.exercisesOf(w),
     };
+  }
+
+  /** Exercises in a log or template, with the definition id needed by the write tools. */
+  private exercisesOf(entity: Entity) {
+    return this.groups(entity).map((g) => {
+      const exerciseId = measurementIdOf(g);
+      return { exerciseId, name: this.exerciseName(exerciseId), sets: this.setsOf(g) };
+    });
+  }
+
+  getTemplate(id: string) {
+    const t = this.snap.entities.template[id];
+    if (!t || t.isHidden === true) return null;
+    return { id: t.id, name: customName(t), exercises: this.exercisesOf(t) };
   }
 
   listTemplates() {

@@ -81,6 +81,17 @@ export function registerReadTools(server: McpServer, deps: Deps): void {
   );
 
   server.registerTool(
+    "strong_get_template",
+    {
+      annotations: READ,
+      description:
+        "Get one template with its exercises (including exerciseId for strong_log_workout) and planned sets.",
+      inputSchema: { id: z.string() },
+    },
+    async (args: { id: string }) => text(service.getTemplate(args.id)),
+  );
+
+  server.registerTool(
     "strong_list_exercises",
     {
       annotations: READ,

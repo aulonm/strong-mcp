@@ -9,7 +9,33 @@ function snap(): Snapshot {
     syncedAt: null,
     preferences: {},
     entities: {
-      template: { t1: { id: "t1", isHidden: false, name: { custom: "PPL" } } },
+      template: {
+        t1: {
+          id: "t1",
+          isHidden: false,
+          name: { custom: "PPL" },
+          logType: "TEMPLATE",
+          _embedded: {
+            cellSetGroup: [
+              {
+                id: "tg1",
+                _links: { measurement: { href: "/api/users/u/measurements/m1" } },
+                cellSets: [
+                  {
+                    id: "ts1",
+                    cells: [
+                      { cellType: "DUMBBELL_WEIGHT", value: "13.6077711" },
+                      { cellType: "REPS", value: "10" },
+                    ],
+                  },
+                  { id: "ts2", cells: [{ cellType: "REST_TIMER", value: "85" }] },
+                ],
+              },
+            ],
+          },
+        },
+        tHidden: { id: "tHidden", isHidden: true, name: { custom: "old" } },
+      },
       log: {
         w1: {
           id: "w1",
@@ -96,6 +122,7 @@ describe("ReadService", () => {
   it("returns a workout with sets in display units (kg→lb), skipping rest timers", () => {
     const w = svc().getWorkout("w1")!;
     expect(w.exercises[0].name).toBe("DB Bench");
+    expect(w.exercises[0].exerciseId).toBe("m1");
     expect(w.exercises[0].sets).toEqual([{ reps: 12, weight: 30, unit: "lb", rpe: null }]);
   });
 
@@ -137,6 +164,25 @@ describe("ReadService", () => {
   it("filters exercise history by date range", () => {
     expect(svc().getExerciseHistory("m1", { since: "2026-07-22" })).toHaveLength(1);
     expect(svc().getExerciseHistory("m1", { until: "2026-07-01" })).toEqual([]);
+  });
+
+  it("returns a template with exercise ids and planned sets", () => {
+    expect(svc().getTemplate("t1")).toEqual({
+      id: "t1",
+      name: "PPL",
+      exercises: [
+        {
+          exerciseId: "m1",
+          name: "DB Bench",
+          sets: [{ reps: 10, weight: 30, unit: "lb", rpe: null }],
+        },
+      ],
+    });
+  });
+
+  it("returns null for a hidden or unknown template", () => {
+    expect(svc().getTemplate("tHidden")).toBeNull();
+    expect(svc().getTemplate("nope")).toBeNull();
   });
 
   it("lists body measurements with type-aware display", () => {
