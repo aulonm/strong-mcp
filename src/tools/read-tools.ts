@@ -114,6 +114,18 @@ export function registerReadTools(server: McpServer, deps: Deps): void {
   );
 
   server.registerTool(
+    "strong_personal_records",
+    {
+      annotations: READ,
+      description:
+        "Personal records per exercise: heaviest weight, best estimated 1RM (Epley, sets of 1-12 reps), most reps and best single-set volume, each with the workout and date it was set. Omit exerciseId for every exercise you have logged; optional since/until.",
+      inputSchema: { exerciseId: z.string().optional(), ...dateRange },
+    },
+    async (args: { exerciseId?: string; since?: string; until?: string }) =>
+      text(service.personalRecords(args.exerciseId, { since: args.since, until: args.until })),
+  );
+
+  server.registerTool(
     "strong_list_measurements",
     {
       annotations: READ,
