@@ -5,7 +5,7 @@ import type { FetchLikeWithHeaders } from "./auth/mfa.js";
 import { TokenStore } from "./auth/token-store.js";
 import { loadConfig } from "./config.js";
 import type { FetchLike } from "./http/client.js";
-import { buildServer } from "./server.js";
+import { buildCsvServer, buildServer } from "./server.js";
 
 async function runLoginCommand() {
   const config = loadConfig(process.env);
@@ -30,6 +30,12 @@ async function runLoginCommand() {
 
 async function runServer() {
   const config = loadConfig(process.env);
+  if (config.csvPath) {
+    const { server } = await buildCsvServer({ ...config, csvPath: config.csvPath });
+    process.stderr.write(`strong-mcp: read-only CSV mode (${config.csvPath})\n`);
+    await server.connect(new StdioServerTransport());
+    return;
+  }
   const { server, sync } = await buildServer(config, fetch as unknown as FetchLike);
   try {
     const { pages } = await sync();

@@ -37,6 +37,24 @@ It prompts for your Strong email and password (the password is not echoed), exch
 
 If Strong doesn't recognize the `deviceId` (e.g. your first login from this machine), it'll email you a verification code instead of logging in directly. The CLI prompts for that code and completes the challenge automatically — you don't need to do anything in the Strong app itself.
 
+## Read-only CSV mode (no login)
+
+If you'd rather not sign in, or the private API changes, the server can run from a Strong export instead. In the app: **Settings → Export Strong Data**. Then point the server at the file:
+
+```json
+{
+  "mcpServers": {
+    "strong": {
+      "command": "node",
+      "args": ["/absolute/path/to/strong-mcp/dist/index.js"],
+      "env": { "STRONG_CSV_PATH": "/absolute/path/to/strong.csv" }
+    }
+  }
+}
+```
+
+All read tools, resources and prompts work. Write tools are not registered. `strong_sync` re-reads the file, so you can drop in a newer export without restarting. The export holds workouts only, so templates and body measurements are empty in this mode. Times are shown as exported (Strong's local wall-clock time).
+
 ## Configuration
 
 Once you've logged in, **no secrets are needed** — the server finds `token.json` on its own. The remaining settings are all optional environment variables (see [`.env.example`](.env.example)):
@@ -45,6 +63,7 @@ Once you've logged in, **no secrets are needed** — the server finds `token.jso
 | --- | --- |
 | `STRONG_DATA_DIR` | Where `token.json` + `snapshot.json` live. Default: `~/.strong-mcp`. |
 | `STRONG_WEIGHT_UNIT` | Force display unit `POUNDS` or `KILOGRAMS`. Default: your account preference. |
+| `STRONG_CSV_PATH` | Serve a Strong CSV export read-only instead of the live account. |
 | `STRONG_PROXY_URL` | HTTP proxy (e.g. Proxyman at `http://localhost:9090`) for debugging. |
 
 ### Bootstrapping from a captured token pair (optional)
