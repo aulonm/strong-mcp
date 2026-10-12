@@ -13,7 +13,14 @@ const setSchema = {
   weight: z.number().nonnegative().optional(),
   rpe: z.number().optional(),
 };
-const exerciseSchema = { exerciseId: z.string(), sets: z.array(z.object(setSchema)).min(1) };
+const exerciseSchema = {
+  exerciseId: z.string().optional().describe("Exercise definition id. Takes precedence over name."),
+  exercise: z
+    .string()
+    .optional()
+    .describe("Exact exercise name (case-insensitive) when you don't have the id."),
+  sets: z.array(z.object(setSchema)).min(1),
+};
 const cellConfigSchema = {
   cellType: z.string(),
   mandatory: z.boolean().optional(),
@@ -26,7 +33,7 @@ export function registerWriteTools(server: McpServer, service: WriteService): vo
     {
       annotations: CREATE,
       description:
-        "Log a completed workout. Exercises referenced by definition id (use strong_list_exercises). Weights in your display unit; omit weight on a set for bodyweight-only exercises. startDate/endDate (ISO) default to now if omitted — pass them for an accurate duration.",
+        "Log a completed workout. Reference each exercise by exerciseId or exact name (ambiguous or unknown names are rejected, never guessed). Weights in your display unit; omit weight on a set for bodyweight-only exercises. startDate/endDate (ISO) default to now if omitted — pass them for an accurate duration.",
       inputSchema: {
         name: z.string(),
         templateId: z.string().optional(),

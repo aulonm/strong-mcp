@@ -90,7 +90,7 @@ If your `token.json` lives somewhere non-default, add `"env": { "STRONG_DATA_DIR
 
 | Tool | Description |
 | --- | --- |
-| `strong_log_workout` | Log a completed workout (exercises by definition id; weights in display unit). |
+| `strong_log_workout` | Log a completed workout (exercises by id or exact name; weights in display unit). |
 | `strong_delete_workout` | Soft-delete a logged workout by id. |
 | `strong_create_template` | Create a workout template (optional `folderId`, defaults to My Templates). |
 | `strong_update_template` | Rename a template by id. |
