@@ -106,6 +106,21 @@ Deletes are **soft** (Strong has no hard delete): the entity is flagged `isHidde
 
 The two _inferred_ tools re-sync server truth after the write and report `serverConfirmed`: `true` (Strong accepted it), `false` (local view is optimistic and unverified — run `strong_sync` to reconcile), or `undefined` (the confirmation re-sync failed; the write itself still succeeded).
 
+### Resources
+
+| URI | Description |
+| --- | --- |
+| `strong://user` | User id, weight unit, last sync time and entity counts. |
+| `strong://exercises` | Every exercise definition with its id and cell types. |
+| `strong://templates` | Saved templates (id and name). |
+
+### Prompts
+
+| Prompt | Description |
+| --- | --- |
+| `weekly-review` | Review the last N weeks (default 4): summary, records, bodyweight. |
+| `log-from-template` | Log a finished workout from a template, asking for actual results and confirming before writing. |
+
 ## Development
 
 ```bash
