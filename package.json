@@ -1,10 +1,38 @@
 {
-  "name": "strong-mcp",
+  "name": "@aulonm/strong-mcp",
   "version": "0.1.0",
-  "private": true,
+  "description": "Unofficial MCP server for the Strong workout app: read, analyze and log workouts, templates, exercises and body measurements.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "strong",
+    "strong-app",
+    "workout",
+    "fitness",
+    "strength-training",
+    "claude"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aulonm/strong-mcp.git"
+  },
+  "homepage": "https://github.com/aulonm/strong-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/aulonm/strong-mcp/issues"
+  },
   "type": "module",
   "bin": {
     "strong-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -15,7 +43,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "biome check src tests",
     "lint:fix": "biome check --write src tests",
-    "format": "biome format --write src tests"
+    "format": "biome format --write src tests",
+    "prepack": "npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.11.0",

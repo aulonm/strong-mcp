@@ -20,10 +20,28 @@ Strong is a **sync-document API**, not a REST API: the client GETs a paginated s
 
 ## Install
 
+Once published to npm, no clone is needed:
+
+```bash
+npx -y @aulonm/strong-mcp login   # sign in once
+```
+
+```json
+{
+  "mcpServers": {
+    "strong": { "command": "npx", "args": ["-y", "@aulonm/strong-mcp"] }
+  }
+}
+```
+
+From source:
+
 ```bash
 npm install
 npm run build
 ```
+
+Releasing: `npm publish` builds first (`prepack`) and ships only `dist/`, the README and the licence.
 
 ## Sign in
 
