@@ -1,3 +1,4 @@
+import { personalRecords } from "../analytics.js";
 import type { Entity, Snapshot } from "../types.js";
 import { formatKg, formatLb, toDisplayMeasuredValue, type WeightUnit } from "../units.js";
 
@@ -202,6 +203,35 @@ export class ReadService {
       }
     }
     return out.sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""));
+  }
+
+  /**
+   * Personal records for one exercise, or for every exercise that has logged
+   * sets when exerciseId is omitted. Weights are in the display unit.
+   */
+  personalRecords(exerciseId?: string, range?: DateRange) {
+    const ids = exerciseId ? [exerciseId] : this.loggedExerciseIds(range);
+    return ids
+      .map((id) => ({
+        exerciseId: id,
+        name: this.exerciseName(id),
+        unit: this.weightUnitLabel,
+        ...personalRecords(this.getExerciseHistory(id, range)),
+      }))
+      .filter((r) => r.sessions > 0)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  private loggedExerciseIds(range?: DateRange): string[] {
+    const ids = new Set<string>();
+    for (const w of this.visible(this.snap.entities.log)) {
+      if (!inRange(w.startDate as string | undefined, range)) continue;
+      for (const g of this.groups(w)) {
+        const id = measurementIdOf(g);
+        if (id) ids.add(id);
+      }
+    }
+    return [...ids];
   }
 
   listMeasurements(type?: string) {
