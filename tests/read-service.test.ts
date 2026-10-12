@@ -121,6 +121,24 @@ describe("ReadService", () => {
     ]);
   });
 
+  it("filters workouts by an inclusive since/until range", () => {
+    const ids = (r: { since?: string; until?: string }) =>
+      svc()
+        .listWorkouts(r)
+        .map((w) => w.id);
+    expect(ids({ since: "2026-07-22" })).toEqual(["w1"]);
+    expect(ids({ since: "2026-07-23" })).toEqual([]);
+    // A bare-date `until` covers that whole day (w1 starts 02:00 on the 22nd).
+    expect(ids({ until: "2026-07-22" })).toEqual(["w1"]);
+    expect(ids({ until: "2026-07-21" })).toEqual([]);
+    expect(ids({ until: "2026-07-22T01:00:00Z" })).toEqual([]);
+  });
+
+  it("filters exercise history by date range", () => {
+    expect(svc().getExerciseHistory("m1", { since: "2026-07-22" })).toHaveLength(1);
+    expect(svc().getExerciseHistory("m1", { until: "2026-07-01" })).toEqual([]);
+  });
+
   it("lists body measurements with type-aware display", () => {
     const m = svc().listMeasurements();
     expect(m).toEqual([
