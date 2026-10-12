@@ -1,0 +1,8 @@
+{
+  "name": "strong-mcp",
+  "version": "0.1.0",
+  "description": "Read, analyze and log Strong workouts, templates, exercises and body measurements in Claude.",
+  "author": { "name": "aulonm" },
+  "repository": "https://github.com/aulonm/strong-mcp",
+  "license": "MIT"
+}
