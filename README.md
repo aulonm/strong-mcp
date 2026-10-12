@@ -101,6 +101,7 @@ Once you've logged in, **no secrets are needed** — the server finds `token.jso
 | `STRONG_WEIGHT_UNIT` | Force display unit `POUNDS` or `KILOGRAMS`. Default: your account preference. |
 | `STRONG_MCP_HTTP_TOKEN` | Bearer token for `--http`; required off loopback. |
 | `STRONG_CSV_PATH` | Serve a Strong CSV export read-only instead of the live account. |
+| `STRONG_CLIENT_VERSION` / `STRONG_CLIENT_BUILD` | Override the Strong app version we identify as (default `6.4.2` / `8332`). Use if Strong starts rejecting requests from an old version. |
 | `STRONG_PROXY_URL` | HTTP proxy (e.g. Proxyman at `http://localhost:9090`) for debugging. |
 
 ### Bootstrapping from a captured token pair (optional)
