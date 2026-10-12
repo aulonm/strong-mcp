@@ -62,4 +62,12 @@ describe("loadConfig", () => {
     expect(cfg.csvPath).toBe("/x/strong.csv");
     expect(loadConfig({ HOME: "/home/j" } as NodeJS.ProcessEnv).csvPath).toBeUndefined();
   });
+  it("reads STRONG_MCP_HTTP_TOKEN and rejects a short one", () => {
+    const token = "a-long-enough-token-123";
+    const env = { HOME: "/h", STRONG_MCP_HTTP_TOKEN: token } as NodeJS.ProcessEnv;
+    expect(loadConfig(env).httpToken).toBe(token);
+    expect(() =>
+      loadConfig({ HOME: "/h", STRONG_MCP_HTTP_TOKEN: "short" } as NodeJS.ProcessEnv),
+    ).toThrow(/STRONG_MCP_HTTP_TOKEN/);
+  });
 });

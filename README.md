@@ -55,6 +55,20 @@ It prompts for your Strong email and password (the password is not echoed), exch
 
 If Strong doesn't recognize the `deviceId` (e.g. your first login from this machine), it'll email you a verification code instead of logging in directly. The CLI prompts for that code and completes the challenge automatically — you don't need to do anything in the Strong app itself.
 
+## HTTP transport
+
+stdio is the default. For clients that connect to a URL, run:
+
+```bash
+strong-mcp --http                 # http://127.0.0.1:3000/mcp
+strong-mcp --http --port 8080
+```
+
+- Streamable HTTP, stateless: `POST /mcp`. `GET /health` returns `ok`.
+- On loopback, requests with a non-loopback `Host` header are rejected (DNS-rebinding guard).
+- Binding to another interface (`--host 0.0.0.0`) requires `STRONG_MCP_HTTP_TOKEN`; clients send `Authorization: Bearer <token>`. You can also set the token on loopback.
+- This is for your own machine or network. It holds your Strong session, so don't expose it publicly.
+
 ## Read-only CSV mode (no login)
 
 If you'd rather not sign in, or the private API changes, the server can run from a Strong export instead. In the app: **Settings → Export Strong Data**. Then point the server at the file:
@@ -81,6 +95,7 @@ Once you've logged in, **no secrets are needed** — the server finds `token.jso
 | --- | --- |
 | `STRONG_DATA_DIR` | Where `token.json` + `snapshot.json` live. Default: `~/.strong-mcp`. |
 | `STRONG_WEIGHT_UNIT` | Force display unit `POUNDS` or `KILOGRAMS`. Default: your account preference. |
+| `STRONG_MCP_HTTP_TOKEN` | Bearer token for `--http`; required off loopback. |
 | `STRONG_CSV_PATH` | Serve a Strong CSV export read-only instead of the live account. |
 | `STRONG_PROXY_URL` | HTTP proxy (e.g. Proxyman at `http://localhost:9090`) for debugging. |
 
