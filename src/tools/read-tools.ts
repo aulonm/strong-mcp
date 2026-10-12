@@ -1,9 +1,14 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { ReadService } from "../services/read-service.js";
+import { trainingSummary } from "../services/summary.js";
 import { READ } from "./annotations.js";
 
-type Deps = { service: ReadService; sync: () => Promise<{ pages: number }> };
+type Deps = {
+  service: ReadService;
+  sync: () => Promise<{ pages: number }>;
+  now?: () => number;
+};
 
 const dateRange = {
   since: z
@@ -23,7 +28,7 @@ const text = (data: unknown) => ({
 });
 
 export function registerReadTools(server: McpServer, deps: Deps): void {
-  const { service, sync } = deps;
+  const { service, sync, now = Date.now } = deps;
 
   server.registerTool(
     "strong_sync",
@@ -111,6 +116,17 @@ export function registerReadTools(server: McpServer, deps: Deps): void {
     },
     async (args: { exerciseId: string; since?: string; until?: string }) =>
       text(service.getExerciseHistory(args.exerciseId, { since: args.since, until: args.until })),
+  );
+
+  server.registerTool(
+    "strong_training_summary",
+    {
+      annotations: READ,
+      description:
+        "Training overview for the last 1-12 calendar weeks (Monday-based, includes the current week): workouts, sets and volume per week, top exercises, average duration, bodyweight trend and days since the last workout. Start here for progress or consistency questions.",
+      inputSchema: { weeks: z.number().int().min(1).max(12).optional().describe("Default 4.") },
+    },
+    async (args: { weeks?: number }) => text(trainingSummary(service, args.weeks ?? 4, now())),
   );
 
   server.registerTool(
