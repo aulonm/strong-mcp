@@ -43,6 +43,10 @@ npm run build
 
 Releasing: `npm publish` builds first (`prepack`) and ships only `dist/`, the README and the licence.
 
+### Claude Code plugin
+
+The repo is also a Claude Code plugin: [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) and [`.mcp.json`](.mcp.json) register the server (via `npx`, so it needs the npm package published), and [`skills/strong-workouts`](skills/strong-workouts/SKILL.md) tells Claude how to use the tools safely. Sign in with `login` before first use.
+
 ## Sign in
 
 Run the login command once, in a terminal:
