@@ -25,6 +25,7 @@ export interface BuiltServer {
   /** A new MCP server over the same services, for transports that need one per request. */
   createServer: () => McpServer;
   sync: () => Promise<{ pages: number }>;
+  whoami: () => ReturnType<ReadService["whoami"]>;
 }
 
 export function resolveWeightUnit(config: Config, snapshot: Snapshot, userId: string): WeightUnit {
@@ -124,7 +125,7 @@ export async function buildServer(
     registerPrompts(server);
     return server;
   };
-  return { server: createServer(), createServer, sync };
+  return { server: createServer(), createServer, sync, whoami: () => service.whoami() };
 }
 
 /**
@@ -152,5 +153,5 @@ export async function buildCsvServer(config: Config & { csvPath: string }): Prom
     registerPrompts(server);
     return server;
   };
-  return { server: createServer(), createServer, sync };
+  return { server: createServer(), createServer, sync, whoami: () => service.whoami() };
 }

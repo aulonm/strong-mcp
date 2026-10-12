@@ -4,6 +4,7 @@ import { fetch } from "undici";
 import { makeTtyPrompts, runLogin } from "./auth/login-command.js";
 import type { FetchLikeWithHeaders } from "./auth/mfa.js";
 import { TokenStore } from "./auth/token-store.js";
+import { type CheckTarget, runCheck } from "./check.js";
 import { parseServeArgs } from "./cli-args.js";
 import { loadConfig } from "./config.js";
 import type { FetchLike } from "./http/client.js";
@@ -55,7 +56,29 @@ async function runServer() {
   await built.server.connect(new StdioServerTransport());
 }
 
+async function runCheckCommand() {
+  const config = loadConfig(process.env);
+  const target: CheckTarget = await (config.csvPath
+    ? buildCsvServer({ ...config, csvPath: config.csvPath })
+    : buildServer(config, fetch as unknown as FetchLike)
+  ).then(
+    (built) => ({ mode: config.csvPath ? "csv" : "live", ...built }),
+    // Missing credentials or an unreadable CSV are reported like a failed sync.
+    (err: Error) => ({ mode: "live", sync: () => Promise.reject(err), whoami: () => never() }),
+  );
+  const result = await runCheck(target);
+  for (const line of result.lines) process.stdout.write(`${line}\n`);
+  process.exit(result.ok ? 0 : 1);
+}
+
+function never(): never {
+  throw new Error("unreachable");
+}
+
 async function main() {
+  if (process.argv[2] === "check") {
+    await runCheckCommand();
+  }
   if (process.argv[2] === "login") {
     await runLoginCommand();
     process.exit(0); // the TTY readline keeps stdin ref'd; exit explicitly
