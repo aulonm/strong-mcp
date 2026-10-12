@@ -5,6 +5,19 @@ import { READ } from "./annotations.js";
 
 type Deps = { service: ReadService; sync: () => Promise<{ pages: number }> };
 
+const dateRange = {
+  since: z
+    .string()
+    .optional()
+    .describe("Only include workouts on or after this ISO date/datetime, e.g. 2026-09-01."),
+  until: z
+    .string()
+    .optional()
+    .describe(
+      "Only include workouts on or before this ISO date; a bare date covers the whole day.",
+    ),
+};
+
 const text = (data: unknown) => ({
   content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
 });
@@ -39,10 +52,12 @@ export function registerReadTools(server: McpServer, deps: Deps): void {
     "strong_list_workouts",
     {
       annotations: READ,
-      description: "List recent workouts (newest first).",
-      inputSchema: { limit: z.number().int().positive().optional() },
+      description:
+        "List recent workouts (newest first); optional limit and since/until date range.",
+      inputSchema: { limit: z.number().int().positive().optional(), ...dateRange },
     },
-    async (args: { limit?: number }) => text(service.listWorkouts({ limit: args.limit })),
+    async (args: { limit?: number; since?: string; until?: string }) =>
+      text(service.listWorkouts(args)),
   );
 
   server.registerTool(
@@ -79,10 +94,12 @@ export function registerReadTools(server: McpServer, deps: Deps): void {
     "strong_get_exercise_history",
     {
       annotations: READ,
-      description: "All logged sets for one exercise over time (by exercise id).",
-      inputSchema: { exerciseId: z.string() },
+      description:
+        "All logged sets for one exercise over time (by exercise id); optional since/until date range.",
+      inputSchema: { exerciseId: z.string(), ...dateRange },
     },
-    async (args: { exerciseId: string }) => text(service.getExerciseHistory(args.exerciseId)),
+    async (args: { exerciseId: string; since?: string; until?: string }) =>
+      text(service.getExerciseHistory(args.exerciseId, { since: args.since, until: args.until })),
   );
 
   server.registerTool(

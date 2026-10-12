@@ -25,6 +25,30 @@ function measurementIdOf(group: any): string | null {
   return href.split("/").pop() ?? null;
 }
 
+export interface DateRange {
+  /** Inclusive lower bound, ISO date or datetime (e.g. "2026-09-01"). */
+  since?: string;
+  /** Inclusive upper bound. A bare date ("2026-09-30") covers that whole day. */
+  until?: string;
+}
+
+/** Bare YYYY-MM-DD `until` means end of that day, not midnight at its start. */
+function untilBound(until: string): number {
+  return /^\d{4}-\d{2}-\d{2}$/.test(until)
+    ? Date.parse(`${until}T23:59:59.999Z`)
+    : Date.parse(until);
+}
+
+function inRange(date: string | undefined, range?: DateRange): boolean {
+  if (!range?.since && !range?.until) return true;
+  if (!date) return false;
+  const t = Date.parse(date);
+  if (Number.isNaN(t)) return false;
+  if (range.since && t < Date.parse(range.since)) return false;
+  if (range.until && t > untilBound(range.until)) return false;
+  return true;
+}
+
 function num(v: unknown): number | null {
   if (v === null || v === undefined || v === "") return null;
   const n = Number(v);
@@ -100,8 +124,9 @@ export class ReadService {
     return m ? customName(m) : "Unknown";
   }
 
-  listWorkouts(opts?: { limit?: number }) {
+  listWorkouts(opts?: { limit?: number } & DateRange) {
     const rows = this.visible(this.snap.entities.log)
+      .filter((w) => inRange(w.startDate as string | undefined, opts))
       .map((w) => ({
         id: w.id,
         name: customName(w),
@@ -148,13 +173,14 @@ export class ReadService {
       .filter((m) => !q || m.name.toLowerCase().includes(q));
   }
 
-  getExerciseHistory(exerciseId: string) {
+  getExerciseHistory(exerciseId: string, range?: DateRange) {
     const out: {
       workoutId: string;
       date?: string;
       sets: { reps: number | null; weight: number | null; unit: string }[];
     }[] = [];
     for (const w of this.visible(this.snap.entities.log)) {
+      if (!inRange(w.startDate as string | undefined, range)) continue;
       for (const g of this.groups(w)) {
         if (measurementIdOf(g) !== exerciseId) continue;
         out.push({
