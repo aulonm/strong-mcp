@@ -91,6 +91,14 @@ If you'd rather not sign in, or the private API changes, the server can run from
 
 All read tools, resources and prompts work. Write tools are not registered. `strong_sync` re-reads the file, so you can drop in a newer export without restarting. The export holds workouts only, so templates and body measurements are empty in this mode. Times are shown as exported (Strong's local wall-clock time).
 
+## Check that it works
+
+```bash
+node dist/index.js check     # or: npx -y @aulonm/strong-mcp check
+```
+
+Runs one sync and prints what it found, or why it failed and what to do next (sign in again, override the client version, wait out a rate limit). Exits non-zero on failure, so it also works in a cron job or a pre-flight script. It respects `STRONG_CSV_PATH`.
+
 ## Configuration
 
 Once you've logged in, **no secrets are needed** — the server finds `token.json` on its own. The remaining settings are all optional environment variables (see [`.env.example`](.env.example)):
