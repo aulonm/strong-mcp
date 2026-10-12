@@ -65,7 +65,7 @@ export class ReadService {
   private displayWeightKg(kg: number): number {
     return this.opts.getWeightUnit() === "KILOGRAMS" ? formatKg(kg) : formatLb(kg);
   }
-  private get weightUnitLabel(): string {
+  get weightUnitLabel(): string {
     return this.opts.getWeightUnit() === "KILOGRAMS" ? "kg" : "lb";
   }
 

@@ -82,6 +82,7 @@ If your `token.json` lives somewhere non-default, add `"env": { "STRONG_DATA_DIR
 | `strong_get_template` | One template with its exercises (ids included) and planned sets. |
 | `strong_list_exercises` | List exercise definitions; optional name `search`. |
 | `strong_get_exercise_history` | All logged sets for one exercise over time; optional `since`/`until`. |
+| `strong_training_summary` | Last 1-12 weeks: workouts, sets and volume per week, top exercises, bodyweight trend. |
 | `strong_personal_records` | Heaviest weight, best estimated 1RM, most reps and best set volume per exercise. |
 | `strong_list_measurements` | List body measurements; optional `type` filter (e.g. `WEIGHT`). |
 

@@ -38,6 +38,7 @@ describe("registerReadTools", () => {
         "strong_list_workouts",
         "strong_personal_records",
         "strong_sync",
+        "strong_training_summary",
         "strong_whoami",
       ].sort(),
     );
