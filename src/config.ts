@@ -15,6 +15,7 @@ const Env = z.object({
   STRONG_DATA_DIR: z.preprocess(emptyToUndefined, z.string().optional()),
   STRONG_PROXY_URL: z.preprocess(emptyToUndefined, z.string().url().optional()),
   STRONG_WEIGHT_UNIT: z.preprocess(emptyToUndefined, z.enum(["POUNDS", "KILOGRAMS"]).optional()),
+  STRONG_CSV_PATH: z.preprocess(emptyToUndefined, z.string().optional()),
   HOME: z.string().optional(),
 });
 
@@ -32,6 +33,8 @@ export interface Config {
   dataDir: string;
   proxyUrl?: string;
   weightUnitOverride?: WeightUnit;
+  /** Read-only mode: serve a Strong CSV export instead of the live account. */
+  csvPath?: string;
   /** Optional env bootstrap; identity/userId is resolved at server startup. */
   seed?: TokenSeed;
 }
@@ -59,6 +62,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
     dataDir,
     proxyUrl: e.STRONG_PROXY_URL,
     weightUnitOverride: e.STRONG_WEIGHT_UNIT,
+    csvPath: e.STRONG_CSV_PATH,
     seed,
   };
 }

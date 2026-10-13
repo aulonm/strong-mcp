@@ -1,8 +1,11 @@
+import { readFile } from "node:fs/promises";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { decodeJwt } from "./auth/jwt.js";
 import { type Seed, TokenManager } from "./auth/token-manager.js";
 import { TokenStore } from "./auth/token-store.js";
 import type { Config } from "./config.js";
+import { parseStrongCsv } from "./csv/parse.js";
+import { csvToSnapshot } from "./csv/to-snapshot.js";
 import { buildRefreshFn, type FetchLike, StrongHttpClient } from "./http/client.js";
 import { registerPrompts } from "./prompts.js";
 import { registerResources } from "./resources.js";
@@ -109,6 +112,33 @@ export async function buildServer(
   const server = new McpServer({ name: "strong-mcp", version: "0.1.0" });
   registerReadTools(server, { service, sync });
   registerWriteTools(server, writeService);
+  registerResources(server, service);
+  registerPrompts(server);
+  return { server, sync };
+}
+
+/**
+ * Read-only server over a Strong CSV export. No credentials and no network:
+ * the file is parsed into a snapshot and served by the same read tools,
+ * resources and prompts. Write tools are not registered. strong_sync re-reads
+ * the file, so dropping in a newer export and syncing picks it up.
+ */
+export async function buildCsvServer(
+  config: Config & { csvPath: string },
+): Promise<{ server: McpServer; sync: () => Promise<{ pages: number }> }> {
+  const load = async () => csvToSnapshot(parseStrongCsv(await readFile(config.csvPath, "utf8")));
+  let snapshot = await load();
+  const service = new ReadService({
+    getSnapshot: () => snapshot,
+    getWeightUnit: () => resolveWeightUnit(config, snapshot, snapshot.userId),
+    userId: snapshot.userId,
+  });
+  const sync = async () => {
+    snapshot = await load();
+    return { pages: 1 };
+  };
+  const server = new McpServer({ name: "strong-mcp", version: "0.1.0" });
+  registerReadTools(server, { service, sync });
   registerResources(server, service);
   registerPrompts(server);
   return { server, sync };

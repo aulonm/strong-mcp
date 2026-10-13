@@ -54,4 +54,12 @@ describe("loadConfig", () => {
     expect(cfg.proxyUrl).toBeUndefined();
     expect(cfg.weightUnitOverride).toBeUndefined();
   });
+  it("reads STRONG_CSV_PATH for read-only CSV mode", () => {
+    const cfg = loadConfig({
+      HOME: "/home/j",
+      STRONG_CSV_PATH: "/x/strong.csv",
+    } as NodeJS.ProcessEnv);
+    expect(cfg.csvPath).toBe("/x/strong.csv");
+    expect(loadConfig({ HOME: "/home/j" } as NodeJS.ProcessEnv).csvPath).toBeUndefined();
+  });
 });
