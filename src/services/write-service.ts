@@ -10,7 +10,8 @@ import {
   removeTemplateFromFolder,
 } from "../write/folders.js";
 import type { Clock } from "../write/ids.js";
-import { type BuildLogInput, buildLog } from "../write/log-builder.js";
+import { buildLog } from "../write/log-builder.js";
+import { type LogInputWithRefs, resolveExercises } from "../write/resolve-exercises.js";
 import { softDelete } from "../write/soft-delete.js";
 import type { WriteEngine } from "../write/write-engine.js";
 
@@ -53,9 +54,9 @@ export class WriteService {
     return { clock: this.opts.clock, weightUnit: this.opts.getWeightUnit() };
   }
 
-  logWorkout(input: BuildLogInput) {
+  logWorkout(input: LogInputWithRefs) {
     return this.opts.engine.write((snapshot) => {
-      const log = buildLog("WORKOUT", input, snapshot, this.deps);
+      const log = buildLog("WORKOUT", resolveExercises(input, snapshot), snapshot, this.deps);
       return {
         changes: [{ collection: "log", entity: log }],
         summary: { id: log.id, name: input.name, exercises: input.exercises.length },
@@ -73,9 +74,9 @@ export class WriteService {
     });
   }
 
-  createTemplate(input: BuildLogInput & { folderId?: string }) {
+  createTemplate(input: LogInputWithRefs & { folderId?: string }) {
     return this.opts.engine.write((snapshot) => {
-      const template = buildLog("TEMPLATE", input, snapshot, this.deps);
+      const template = buildLog("TEMPLATE", resolveExercises(input, snapshot), snapshot, this.deps);
       const changes: Change[] = [{ collection: "template", entity: template }];
       let folder: Entity | undefined;
       if (input.folderId) {
