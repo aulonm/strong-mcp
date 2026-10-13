@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { WriteService } from "../services/write-service.js";
+import { CREATE, DELETE, UPDATE } from "./annotations.js";
 
 const text = (data: unknown) => ({
   content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
@@ -23,6 +24,7 @@ export function registerWriteTools(server: McpServer, service: WriteService): vo
   server.registerTool(
     "strong_log_workout",
     {
+      annotations: CREATE,
       description:
         "Log a completed workout. Exercises referenced by definition id (use strong_list_exercises). Weights in your display unit; omit weight on a set for bodyweight-only exercises. startDate/endDate (ISO) default to now if omitted — pass them for an accurate duration.",
       inputSchema: {
@@ -38,13 +40,18 @@ export function registerWriteTools(server: McpServer, service: WriteService): vo
 
   server.registerTool(
     "strong_delete_workout",
-    { description: "Soft-delete a logged workout by id.", inputSchema: { id: z.string() } },
+    {
+      annotations: DELETE,
+      description: "Soft-delete a logged workout by id.",
+      inputSchema: { id: z.string() },
+    },
     async (a: any) => text(await service.deleteWorkout(a.id)),
   );
 
   server.registerTool(
     "strong_create_template",
     {
+      annotations: CREATE,
       description: "Create a workout template. Optional folderId (defaults to My Templates).",
       inputSchema: {
         name: z.string(),
@@ -57,13 +64,18 @@ export function registerWriteTools(server: McpServer, service: WriteService): vo
 
   server.registerTool(
     "strong_update_template",
-    { description: "Rename a template by id.", inputSchema: { id: z.string(), name: z.string() } },
+    {
+      annotations: UPDATE,
+      description: "Rename a template by id.",
+      inputSchema: { id: z.string(), name: z.string() },
+    },
     async (a: any) => text(await service.updateTemplateName(a.id, a.name)),
   );
 
   server.registerTool(
     "strong_delete_template",
     {
+      annotations: DELETE,
       description: "Soft-delete a template by id (also unlinks it from its folder).",
       inputSchema: { id: z.string() },
     },
@@ -73,6 +85,7 @@ export function registerWriteTools(server: McpServer, service: WriteService): vo
   server.registerTool(
     "strong_log_measurement",
     {
+      annotations: CREATE,
       description:
         "Log a body measurement. type e.g. WEIGHT (display unit), BODY_FAT_PERCENTAGE (whole %), CALORIC_INTAKE (kcal).",
       inputSchema: { type: z.string(), value: z.number() },
@@ -83,6 +96,7 @@ export function registerWriteTools(server: McpServer, service: WriteService): vo
   server.registerTool(
     "strong_create_exercise",
     {
+      annotations: CREATE,
       description: "Create a custom exercise definition.",
       inputSchema: {
         name: z.string(),
@@ -97,6 +111,7 @@ export function registerWriteTools(server: McpServer, service: WriteService): vo
   server.registerTool(
     "strong_update_exercise",
     {
+      annotations: UPDATE,
       description: "Rename a custom exercise by id.",
       inputSchema: { id: z.string(), name: z.string() },
     },
@@ -106,6 +121,7 @@ export function registerWriteTools(server: McpServer, service: WriteService): vo
   server.registerTool(
     "strong_archive_exercise",
     {
+      annotations: DELETE,
       description: "Archive (soft-delete) a custom exercise by id.",
       inputSchema: { id: z.string() },
     },
@@ -115,6 +131,7 @@ export function registerWriteTools(server: McpServer, service: WriteService): vo
   server.registerTool(
     "strong_update_workout",
     {
+      annotations: UPDATE,
       description:
         "Edit sets in a logged workout by id. Each edit targets a working set by position: {groupIndex, setIndex, reps?, weight?, rpe?}. Weights in your display unit; untouched cells are preserved verbatim. INFERRED shape — result includes serverConfirmed: true means Strong accepted the edit; false means the local view is optimistic and unverified (run strong_sync to reconcile); undefined means the confirmation re-sync failed.",
       inputSchema: {
@@ -138,6 +155,7 @@ export function registerWriteTools(server: McpServer, service: WriteService): vo
   server.registerTool(
     "strong_delete_measurement",
     {
+      annotations: DELETE,
       description:
         "Soft-delete a body measurement by id. INFERRED shape — result includes serverConfirmed: true means Strong accepted the delete; false means the local view is optimistic and unverified (run strong_sync to reconcile); undefined means the confirmation re-sync failed.",
       inputSchema: { id: z.string() },
