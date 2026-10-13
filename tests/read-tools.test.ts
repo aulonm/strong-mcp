@@ -16,6 +16,7 @@ const service = {
   listWorkouts: vi.fn(() => [{ id: "w1", name: "Push", exerciseCount: 1 }]),
   getWorkout: vi.fn(() => ({ id: "w1", name: "Push", exercises: [] })),
   listTemplates: vi.fn(() => []),
+  getTemplate: vi.fn(() => null),
   listExercises: vi.fn(() => [{ id: "m1", name: "Bench", cellTypes: [] }]),
   getExerciseHistory: vi.fn(() => []),
   listMeasurements: vi.fn(() => []),
@@ -28,6 +29,7 @@ describe("registerReadTools", () => {
     expect(Object.keys(server.handlers).sort()).toEqual(
       [
         "strong_get_exercise_history",
+        "strong_get_template",
         "strong_get_workout",
         "strong_list_exercises",
         "strong_list_measurements",
