@@ -20,6 +20,7 @@ const service = {
   listExercises: vi.fn(() => [{ id: "m1", name: "Bench", cellTypes: [] }]),
   getExerciseHistory: vi.fn(() => []),
   listMeasurements: vi.fn(() => []),
+  personalRecords: vi.fn(() => []),
 } as any;
 
 describe("registerReadTools", () => {
@@ -35,6 +36,7 @@ describe("registerReadTools", () => {
         "strong_list_measurements",
         "strong_list_templates",
         "strong_list_workouts",
+        "strong_personal_records",
         "strong_sync",
         "strong_whoami",
       ].sort(),

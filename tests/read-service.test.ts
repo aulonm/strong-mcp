@@ -185,6 +185,23 @@ describe("ReadService", () => {
     expect(svc().getTemplate("nope")).toBeNull();
   });
 
+  it("reports personal records per logged exercise in display units", () => {
+    const [pr] = svc().personalRecords();
+    expect(pr).toMatchObject({
+      exerciseId: "m1",
+      name: "DB Bench",
+      unit: "lb",
+      sessions: 1,
+      heaviestWeight: { workoutId: "w1", weight: 30, reps: 12 },
+      mostReps: { reps: 12 },
+    });
+    expect(pr.bestEstimatedOneRepMax?.e1rm).toBe(42);
+  });
+
+  it("returns no records for an exercise outside the date range", () => {
+    expect(svc().personalRecords("m1", { since: "2027-01-01" })).toEqual([]);
+  });
+
   it("lists body measurements with type-aware display", () => {
     const m = svc().listMeasurements();
     expect(m).toEqual([
