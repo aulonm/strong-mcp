@@ -202,6 +202,27 @@ describe("ReadService", () => {
     expect(svc().personalRecords("m1", { since: "2027-01-01" })).toEqual([]);
   });
 
+  it("passes unmodelled cell types through raw instead of dropping them", () => {
+    const base = snap();
+    const group = (base.entities.log.w1._embedded as any).cellSetGroup[0];
+    group.cellSets[0].cells.push(
+      { cellType: "DISTANCE", value: "5000" },
+      { cellType: "DURATION", value: null },
+    );
+    const read = new ReadService({
+      getSnapshot: () => base,
+      getWeightUnit: () => "POUNDS",
+      userId: "u",
+    });
+    expect(read.getWorkout("w1")!.exercises[0].sets[0]).toEqual({
+      reps: 12,
+      weight: 30,
+      unit: "lb",
+      rpe: null,
+      otherCells: [{ cellType: "DISTANCE", value: "5000" }],
+    });
+  });
+
   it("lists body measurements with type-aware display", () => {
     const m = svc().listMeasurements();
     expect(m).toEqual([
