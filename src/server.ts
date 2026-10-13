@@ -4,6 +4,8 @@ import { type Seed, TokenManager } from "./auth/token-manager.js";
 import { TokenStore } from "./auth/token-store.js";
 import type { Config } from "./config.js";
 import { buildRefreshFn, type FetchLike, StrongHttpClient } from "./http/client.js";
+import { registerPrompts } from "./prompts.js";
+import { registerResources } from "./resources.js";
 import { ReadService } from "./services/read-service.js";
 import { WriteService } from "./services/write-service.js";
 import { SnapshotStore } from "./sync/snapshot-store.js";
@@ -107,5 +109,7 @@ export async function buildServer(
   const server = new McpServer({ name: "strong-mcp", version: "0.1.0" });
   registerReadTools(server, { service, sync });
   registerWriteTools(server, writeService);
+  registerResources(server, service);
+  registerPrompts(server);
   return { server, sync };
 }
